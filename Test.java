@@ -7,9 +7,13 @@ public class Test {
 
   public static void main(String[] args) {
     Window w;
-    DataLoader loder = new DataLoader();
 
-    loder.loadMNIST(true);
+    NumberData testData = DataLoader.loadMNISTTraining(false);
+
+    //loder.loadMNIST(true);
+    Vector V = new Vector(3);
+    Vector U = new Vector(V);
+
+    Network net = new Network(784, 30, 10);
   }
-
 }

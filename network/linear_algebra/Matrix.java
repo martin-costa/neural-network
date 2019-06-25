@@ -1,5 +1,7 @@
 package network.linear_algebra;
 
+import java.util.Random;
+
 public class Matrix {
   public final int m; //rows
   public final int n; //columns
@@ -9,7 +11,15 @@ public class Matrix {
   public Matrix(int m, int n) {
     this.m = m;
     this.n = n;
-    initialiseMatrix();
+    elts = new double[m][n];
+    fillGaussian();
+  }
+
+  public Matrix(int m, int n, double x) {
+    this.m = m;
+    this.n = n;
+    elts = new double[m][n];
+    fillMatrix(x);
   }
 
   public Matrix(double[][] elts) {
@@ -26,7 +36,7 @@ public class Matrix {
 
   private void initialiseMatrix() {
     elts = new double[m][n];
-    fillMatrix(0);
+    fillGaussian();
   }
 
   private void setMatrix(Matrix M) {
@@ -90,7 +100,7 @@ public class Matrix {
       System.err.println("error: incomplatible matrix sizes");
       return null;
     }
-    Matrix A = new Matrix(this.m, M.n);
+    Matrix A = new Matrix(this.m, M.n, 0d);
     for (int i = 1; i <= M.n; i++) {
       for (int j = 1; j <= this.m; j++) {
         for (int k = 1; k <= this.n; k++) {
@@ -114,6 +124,16 @@ public class Matrix {
     return this;
   }
 
+  public Matrix fillGaussian() {
+    Random gen = new Random();
+    for (int i = 1; i <= m; i++) {
+      for (int j = 1; j <= n; j++) {
+        set(i, j, gen.nextGaussian());
+      }
+    }
+    return this;
+  }
+
   public Vector toVector() {
     if (this.n != 1) {
       return null;
@@ -123,6 +143,29 @@ public class Matrix {
       V.set(i, this.get(i,1));
     }
     return V;
+  }
+
+  public String toString(int d) {
+    String end = " ;";
+    if (d >= 10) {
+      end = " ]\n[";
+      d = (int)Math.abs(d - 10);
+    }
+    String s = "[";
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        s += " " + String.format("%."+d+"f", this.elts[i][j]);
+      }
+      if (i < m - 1) {
+        s += end;
+      }
+    }
+    s += " ]";
+    return s;
+  }
+
+  public String toString() {
+    return toString(5);
   }
 
 }

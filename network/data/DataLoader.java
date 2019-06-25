@@ -7,32 +7,33 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.*;
 import java.awt.image.*;
+import network.linear_algebra.*;
 
 public class DataLoader {
 
-  //make display window for data being loaded
-  Window display;
+  public static NumberData loadMNISTTraining(boolean showData) {
+    return loadMNIST(showData, "train");
+  }
+
+  public static NumberData loadMNISTTest(boolean showData) {
+    return loadMNIST(showData, "t10k");
+  }
 
   //this method is to load in the data from the MNIST database
-  public void loadMNIST(boolean showData) {
+  private static NumberData loadMNIST(boolean showData, String path) {
+    //make display window for data being loaded
+    Window display = null;
+
     if (showData) display = new Window();
 
-    int res = 28; //all images have a resolution of 28x28
+    int res = 28; //all MNIST images have a resolution of 28x28
 
-    FileInputStream images;
-    FileInputStream labels;
-
-    String inputImagePath = "network/data/mnist/train-images.idx3-ubyte";
-    String inputLabelPath = "network/data/mnist/train-labels.idx1-ubyte";
-
-    // String inputImagePath = "network/data/mnist/t10k-images.idx3-ubyte";
-    // String inputLabelPath = "network/data/mnist/t10k-labels.idx1-ubyte";
-
-    //String outputPath = "";
+    //the data
+    NumberData data = null;
 
     try {
-      images = new FileInputStream(inputImagePath);
-      labels = new FileInputStream(inputLabelPath);
+      FileInputStream images = new FileInputStream("network/data/mnist/" + path + "-images.idx3-ubyte");
+      FileInputStream labels = new FileInputStream("network/data/mnist/" + path + "-labels.idx1-ubyte");
 
       //skip magic number
       images.skip(4);
@@ -44,39 +45,46 @@ public class DataLoader {
       images.skip(8);
       labels.skip(8);
 
-      double[][] pixels = new double[res][res];
+      Vector pixelVector = new Vector(res*res, 0);
+
+      //create the data
+      data = new NumberData(imageCount);
 
       for(int k = 0; k < imageCount; k++) {
-        if(k % 100 == 0) System.out.println("Number of images extracted: " + k);
-
-        for (int j = 0; j < res; j++) {
-          for (int i = 0; i < res; i++) {
-            pixels[i][j] = images.read()/255d;
-          }
-        }
+        if(k % 50 == 0) System.out.print("\r" + k + "/" + imageCount + " images loaded");
 
         //update the display window
         if (showData) {
+          double[][] pixels = new double[res][res];
+          for (int j = 0; j < res; j++) {
+            for (int i = 0; i < res; i++) {
+              pixels[i][j] = images.read()/255d;
+              pixelVector.set(j*res + i + 1, pixels[i][j]);
+            }
+          }
           display.display(pixels);
           display.update();
         }
-
-        //sleep
-        try {
-          Thread.sleep(400);
+        else {
+          for (int i = 1; i <= res*res; i++) {
+            pixelVector.set(i, images.read()/255d);
+          }
         }
-        catch(Exception e) {}
 
-        //some output shi
-        System.out.println(labels.read());
+        data.addData(k, labels.read(), pixelVector);
+
+        // try {
+        //   Thread.sleep(200);
+        // }
+        // catch(Exception e) {}
       }
-
     }
     catch (Exception e) {
       System.err.println("error");
     }
 
-    System.out.println("All images successfully exctracted");
     if (showData) display.close();
+    System.out.println("\rData successfully exported");
+    return data;
   }
 }

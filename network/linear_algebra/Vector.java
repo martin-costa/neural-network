@@ -6,6 +6,10 @@ public class Vector extends Matrix {
     super(m, 1);
   }
 
+  public Vector(int m, double x) {
+    super(m, 1, x);
+  }
+
   public Vector(double[] elts) {
     super(elts.length, 1);
     double[][] elts2 = new double[1][];
@@ -17,8 +21,8 @@ public class Vector extends Matrix {
     super(V);
   }
 
-  public void set(int m, double e) {
-    super.set(m,1,e);
+  public void set(int m, double x) {
+    super.set(m,1,x);
   }
 
   public double get(int m) {
@@ -39,5 +43,13 @@ public class Vector extends Matrix {
       dotProduct += super.get(i,1) * x.get(i,1);
     }
     return dotProduct;
+  }
+
+  public double length() {
+    double length = 0;
+    for (int i = 1; i <= m; i++) {
+      length += Math.pow(get(i), 2);
+    }
+    return Math.sqrt(length);
   }
 }

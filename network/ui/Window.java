@@ -57,7 +57,7 @@ public class Window {
     window.setVisible(true);
 
     window.setSize(new Dimension(resolution*pixelWidth, resolution*pixelWidth));
-    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
 
   public void update() {
