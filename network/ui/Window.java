@@ -2,170 +2,183 @@ package network.ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Dimension;
 import java.awt.event.*;
 import java.awt.MouseInfo;
+import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import java.util.*;
 
-import network.linear_algebra.*;
-
 public class Window {
   private JFrame window;
   private DrawingPanel panel;
+
   private MouseInputs mouseInputs;
   private KeyInputs keyInputs;
 
-  private int mouseX = 0;
-  private int mouseY = 0;
-
-
-  private Color backgroundColor = new Color(255,255,255,255);
+  private Point mousePos = new Point();
 
   private final int resolution = 28;
   private final int pixelWidth = 15;
-  private final int width;
   private double[][] pixels;
 
+  private boolean drawMode;
+
   public Window() {
-    this.window = new JFrame("Neural Network");
+    drawMode = true;
 
-    this.width = resolution*pixelWidth;
+    //create window and DrawingPanel
+    window = new JFrame("Neural Network");
+    panel = new DrawingPanel();
 
-    this.pixels = new double[resolution][resolution];
+    //create pixel array
+    pixels = new double[resolution][resolution];
 
-    this.panel = new DrawingPanel(resolution, pixelWidth);
+    //create input handlers
+    mouseInputs = new MouseInputs();
+    keyInputs = new KeyInputs();
 
-    this.mouseInputs = new MouseInputs(pixels);
-    this.keyInputs = new KeyInputs(pixels);
+    //add inputs to window
+    window.addMouseListener(mouseInputs);
+    window.addKeyListener(keyInputs);
 
-    //add inputs to panel
-    this.window.addMouseListener(mouseInputs);
-    this.window.addKeyListener(keyInputs);
+    //initial location of window
+    window.setLocation(900, 300);
 
-    this.window.setLocation(1400, 300);
+    //add panel to window
+    window.add(panel);
 
-    this.window.add(this.panel);
+    //window settings
+    window.setUndecorated(true);
+    window.setResizable(false);
+    window.setVisible(true);
 
-    this.window.setUndecorated(true);
-    this.window.setResizable(false);
-    this.window.setVisible(true);
-
-    this.window.setSize(new Dimension(this.width, this.width));
-    this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    window.setSize(new Dimension(resolution*pixelWidth, resolution*pixelWidth));
+    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
 
   public void update() {
-    mouseX = (int)MouseInfo.getPointerInfo().getLocation().getX();
-    mouseY = (int)MouseInfo.getPointerInfo().getLocation().getY();
+    mousePos = MouseInfo.getPointerInfo().getLocation();
 
-    mouseInputs.draw(mouseX - this.window.getX(), mouseY - this.window.getY());
+    //draw on the window by left clicking
+    if (mouseInputs.leftPressed && drawMode)
+      draw((int)(mousePos.getX() - window.getX()), (int)(mousePos.getY() - window.getY()));
 
-    //update here
-    this.panel.repaint();
-    this.panel.setBackground(backgroundColor);
+    //move window by right clicking
+    if (mouseInputs.rightPressed)
+      move();
+
+    //update the windows image
+    panel.repaint();
   }
 
-  class DrawingPanel extends JPanel {
-    private final int resolution;
-    private final int width;
-    private final int pixelWidth;
+  //display imaage passed into the method, turns off drawmode
+  public void display(double[][] pixels) {
+    this.pixels = pixels;
+    drawMode = false;
+  }
 
-    DrawingPanel(int resolution, int pixelWidth) {
-      this.resolution = resolution;
-      this.pixelWidth = pixelWidth;
-      this.width = resolution*pixelWidth;
+  //update methods
+
+  //draw on the window
+  public void draw(int x , int y) {
+    try{
+      pixels[x/pixelWidth][y/pixelWidth] = 1;
+      pixels[x/pixelWidth + 1][y/pixelWidth] = 1;
+      pixels[x/pixelWidth - 1][y/pixelWidth] = 1;
+      pixels[x/pixelWidth][y/pixelWidth + 1] = 1;
+      pixels[x/pixelWidth][y/pixelWidth - 1] = 1;
+
+      if (pixels[x/pixelWidth + 1][y/pixelWidth + 1] < 1) {
+        pixels[x/pixelWidth + 1][y/pixelWidth + 1] = Math.random();
+      }
+      if (pixels[x/pixelWidth + 1][y/pixelWidth - 1] < 1) {
+        pixels[x/pixelWidth + 1][y/pixelWidth - 1] = Math.random();
+      }
+      if (pixels[x/pixelWidth - 1][y/pixelWidth + 1] < 1) {
+        pixels[x/pixelWidth - 1][y/pixelWidth + 1] = Math.random();
+      }
+      if (pixels[x/pixelWidth - 1][y/pixelWidth - 1] < 1) {
+        pixels[x/pixelWidth - 1][y/pixelWidth - 1] = Math.random();
+      }
     }
+    catch(ArrayIndexOutOfBoundsException e) {}
+  }
+
+  //move the window to mouse position
+  public void move() {
+    window.setLocation((int)mousePos.getX(), (int)mousePos.getY());
+  }
+
+
+  //clear the window
+  public void reset() {
+    for (int i = 0; i < pixels.length; i++) {
+      for (int j = 0; j < pixels.length; j++) {
+        pixels[i][j] = 0;
+      }
+    }
+  }
+
+  //close the window
+  public void close() {
+    window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
+  }
+
+
+
+  class DrawingPanel extends JPanel {
 
     @Override
     public void paint(Graphics g) {
       for (int i = 0; i < resolution; i++) {
         for (int j = 0; j < resolution; j++) {
           double c = pixels[i][j];
-          g.setColor(new Color((int)((1 - c)*255), (int)((1 - c)*255), (int)((1 - c)*255), 255));
-          g.fillRect(i*this.pixelWidth, j*this.pixelWidth, this.pixelWidth, this.pixelWidth);
+          int intensity = (int)((1 - c)*255);
+          g.setColor(new Color(intensity, intensity, intensity, 255));
+          g.fillRect(i*pixelWidth, j*pixelWidth, pixelWidth, pixelWidth);
         }
       }
     }
-
   }
 
+  //handles all the mouse inputs
   class MouseInputs extends MouseAdapter {
-    double[][] pixels;
-    boolean pressed;
-
-    MouseInputs(double[][] pixels) {
-      this.pixels = pixels;
-    }
-
-    public void draw(int x , int y) {
-      if (pressed) {
-        try{
-          this.pixels[x/pixelWidth][y/pixelWidth] = 1;
-          this.pixels[x/pixelWidth + 1][y/pixelWidth] = 1;
-          this.pixels[x/pixelWidth - 1][y/pixelWidth] = 1;
-          this.pixels[x/pixelWidth][y/pixelWidth + 1] = 1;
-          this.pixels[x/pixelWidth][y/pixelWidth - 1] = 1;
-
-          if (this.pixels[x/pixelWidth + 1][y/pixelWidth + 1] < 1) {
-            this.pixels[x/pixelWidth + 1][y/pixelWidth + 1] = Math.random();
-          }
-          if (this.pixels[x/pixelWidth + 1][y/pixelWidth - 1] < 1) {
-            this.pixels[x/pixelWidth + 1][y/pixelWidth - 1] = Math.random();
-          }
-          if (this.pixels[x/pixelWidth - 1][y/pixelWidth + 1] < 1) {
-            this.pixels[x/pixelWidth - 1][y/pixelWidth + 1] = Math.random();
-          }
-          if (this.pixels[x/pixelWidth - 1][y/pixelWidth - 1] < 1) {
-            this.pixels[x/pixelWidth - 1][y/pixelWidth - 1] = Math.random();
-          }
-        }
-        catch(ArrayIndexOutOfBoundsException e) {}
-      }
-    }
+    boolean leftPressed;
+    boolean rightPressed;
 
     @Override
     public void mousePressed(MouseEvent e) {
-      pressed = true;
-      draw(e.getX(), e.getY());
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-      draw(e.getX(), e.getY());
+      if (e.getButton() == MouseEvent.BUTTON1) leftPressed = true;
+      if (e.getButton() == MouseEvent.BUTTON3) rightPressed = true;
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-      draw(e.getX(), e.getY());
-      pressed = false;
+      if (e.getButton() == MouseEvent.BUTTON1) leftPressed = false;
+      if (e.getButton() == MouseEvent.BUTTON3) rightPressed = false;
     }
   }
 
+  //handles all of the key inputs
   class KeyInputs extends KeyAdapter {
-    double[][] pixels;
-
-    KeyInputs(double[][] pixels) {
-      this.pixels = pixels;
-    }
 
     public void keyPressed(KeyEvent e) {
-      if (e.getKeyCode() == KeyEvent.VK_R) {
-        for (int i = 0; i < pixels.length; i++) {
-          for (int j = 0; j < pixels.length; j++) {
-            pixels[i][j] = 0;
-          }
-        }
+      if (e.getKeyCode() == KeyEvent.VK_R && drawMode) {
+        reset();
       }
-      else if (e.getKeyCode() == KeyEvent.VK_F) {
-        window.setLocation(mouseX, mouseY);
+      if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+        close();
       }
-      else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-        window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
+    }
+
+    public void keyTyped(KeyEvent e) {
+      if (Character.toLowerCase(e.getKeyChar()) == 'd') {
+        drawMode = !drawMode;
+        reset();
       }
     }
   }

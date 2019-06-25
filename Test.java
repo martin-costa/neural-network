@@ -1,17 +1,15 @@
 import network.*;
+import network.data.*;
 import network.linear_algebra.*;
 import network.ui.*;
 
 public class Test {
 
   public static void main(String[] args) {
-    Window window = new Window();
+    Window w;
+    DataLoader loder = new DataLoader();
 
-    int i = 0;
-    while(true) {
-      window.update();
-      i++;
-    }
+    loder.loadMNIST(true);
   }
 
 }
