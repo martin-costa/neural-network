@@ -10,7 +10,7 @@ import java.awt.Point;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import java.util.*;
+import network.linear_algebra.*;
 
 public class Window {
   private JFrame window;
@@ -23,7 +23,7 @@ public class Window {
 
   private final int resolution = 28;
   private final int pixelWidth = 15;
-  private double[][] pixels;
+  private Vector pixels;
 
   private boolean drawMode;
 
@@ -35,7 +35,7 @@ public class Window {
     panel = new DrawingPanel();
 
     //create pixel array
-    pixels = new double[resolution][resolution];
+    pixels = new Vector(resolution*resolution, 0);
 
     //create input handlers
     mouseInputs = new MouseInputs();
@@ -76,7 +76,7 @@ public class Window {
   }
 
   //display imaage passed into the method, turns off drawmode
-  public void display(double[][] pixels) {
+  public void display(Vector pixels) {
     this.pixels = pixels;
     drawMode = false;
   }
@@ -86,23 +86,26 @@ public class Window {
   //draw on the window
   public void draw(int x , int y) {
     try{
-      pixels[x/pixelWidth][y/pixelWidth] = 1;
-      pixels[x/pixelWidth + 1][y/pixelWidth] = 1;
-      pixels[x/pixelWidth - 1][y/pixelWidth] = 1;
-      pixels[x/pixelWidth][y/pixelWidth + 1] = 1;
-      pixels[x/pixelWidth][y/pixelWidth - 1] = 1;
+      x = x/pixelWidth;
+      y = y/pixelWidth;
 
-      if (pixels[x/pixelWidth + 1][y/pixelWidth + 1] < 1) {
-        pixels[x/pixelWidth + 1][y/pixelWidth + 1] = Math.random();
+      pixels.set(x + y*resolution, 1);
+      pixels.set(x + 1 + y*resolution, 1);
+      pixels.set(x - 1 + y*resolution, 1);
+      pixels.set(x + (y + 1)*resolution, 1);
+      pixels.set(x + (y - 1)*resolution, 1);
+
+      if (pixels.get(x + 1 + (y + 1)*resolution) < 1) {
+        pixels.set(x + 1 + (y + 1)*resolution, Math.random());
       }
-      if (pixels[x/pixelWidth + 1][y/pixelWidth - 1] < 1) {
-        pixels[x/pixelWidth + 1][y/pixelWidth - 1] = Math.random();
+      if (pixels.get(x + 1 + (y - 1)*resolution) < 1) {
+        pixels.set(x + 1 + (y - 1)*resolution, Math.random());
       }
-      if (pixels[x/pixelWidth - 1][y/pixelWidth + 1] < 1) {
-        pixels[x/pixelWidth - 1][y/pixelWidth + 1] = Math.random();
+      if (pixels.get(x - 1 + (y + 1)*resolution) < 1) {
+        pixels.set(x - 1 + (y + 1)*resolution, Math.random());
       }
-      if (pixels[x/pixelWidth - 1][y/pixelWidth - 1] < 1) {
-        pixels[x/pixelWidth - 1][y/pixelWidth - 1] = Math.random();
+      if (pixels.get(x - 1 + (y - 1)*resolution) < 1) {
+        pixels.set(x - 1 + (y - 1)*resolution, Math.random());
       }
     }
     catch(ArrayIndexOutOfBoundsException e) {}
@@ -116,11 +119,7 @@ public class Window {
 
   //clear the window
   public void reset() {
-    for (int i = 0; i < pixels.length; i++) {
-      for (int j = 0; j < pixels.length; j++) {
-        pixels[i][j] = 0;
-      }
-    }
+    pixels = new Vector(resolution*resolution, 0);
   }
 
   //close the window
@@ -136,7 +135,7 @@ public class Window {
     public void paint(Graphics g) {
       for (int i = 0; i < resolution; i++) {
         for (int j = 0; j < resolution; j++) {
-          double c = pixels[i][j];
+          double c = pixels.get(i + j*resolution);
           int intensity = (int)((1 - c)*255);
           g.setColor(new Color(intensity, intensity, intensity, 255));
           g.fillRect(i*pixelWidth, j*pixelWidth, pixelWidth, pixelWidth);

@@ -1,6 +1,7 @@
 package network;
 
 import network.linear_algebra.*;
+import network.data.*;
 import java.util.Random;
 
 public class Network {
@@ -9,9 +10,6 @@ public class Network {
 
   private Matrix[] weights;
   private Vector[] biases;
-
-  private double learnRate;
-  private double miniBatchSize;
 
   //initialise the neural network
   public Network(int... layers) {
@@ -43,9 +41,29 @@ public class Network {
     return a;
   }
 
-  //sgd algorithm for training
-  public void stochasticGradientDescent() {
+  //learning algorithms here
 
+  //sgd algorithm for training the neural network
+  public void stochasticGradientDescent(int epochs, int miniBatches, int learnRate, NumberData trainingData, NumberData testData) {
+
+  }
+
+  //applies sgd using backprop to a mini batch
+  public void updateMiniBatch(NumberData miniBatch) {
+
+  }
+
+  //backprop
+  public void backpropagation() {
+
+  }
+
+  public int evaluate(NumberData testData) {
+    int j = 0;
+    for (int i = 0; i < testData.size; i++) {
+      if (feedForward(testData.images[i]).maxIndex() == testData.numbers[i]) j++;
+    }
+    return j;
   }
 
   //aux methods ..............
@@ -55,7 +73,7 @@ public class Network {
   }
 
   public static Vector sigmoid(Vector x) {
-    for (int i = 1; i <= x.m; i++) {
+    for (int i = 0; i < x.m; i++) {
       x.set(i , sigmoid(x.get(i)));
     }
     return x;

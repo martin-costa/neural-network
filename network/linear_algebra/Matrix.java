@@ -6,7 +6,7 @@ public class Matrix {
   public final int m; //rows
   public final int n; //columns
 
-  protected double[][] elts;
+  private double[][] elts;
 
   public Matrix(int m, int n) {
     this.m = m;
@@ -48,37 +48,21 @@ public class Matrix {
     }
   }
 
-  protected void setMatrix(double[][] elts) {
+  private void setMatrix(double[][] elts) {
     this.elts = new double[m][n];
-    try {
-      for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
-          set(i,j, elts[i - 1][j - 1]);
-        }
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        this.elts[i][j] = elts[i][j];
       }
-    }
-    catch(ArrayIndexOutOfBoundsException ex) {
-      System.out.println("error: array not a valid matrix");
     }
   }
 
   public void set(int m, int n, double e) {
-    try {
-      this.elts[m - 1][n - 1] = e;
-    }
-    catch(ArrayIndexOutOfBoundsException ex) {
-      System.err.println("error: index out of bounds");
-    }
+    this.elts[m][n] = e;
   }
 
   public double get(int m, int n) {
-    try {
-      return this.elts[m - 1][n - 1];
-    }
-    catch(ArrayIndexOutOfBoundsException ex) {
-      System.err.println("error: index out of bounds");
-    }
-    return 0;
+    return this.elts[m][n];
   }
 
   public Matrix add(Matrix M) {
@@ -87,8 +71,8 @@ public class Matrix {
       return null;
     }
     Matrix A = new Matrix(this.m, this.n);
-    for (int i = 1; i <= this.m; i++) {
-      for (int j = 1; j <= this.n; j++) {
+    for (int i = 0; i < this.m; i++) {
+      for (int j = 0; j < this.n; j++) {
         A.set(i, j, this.get(i,j) + M.get(i,j));
       }
     }
@@ -101,9 +85,9 @@ public class Matrix {
       return null;
     }
     Matrix A = new Matrix(this.m, M.n, 0d);
-    for (int i = 1; i <= M.n; i++) {
-      for (int j = 1; j <= this.m; j++) {
-        for (int k = 1; k <= this.n; k++) {
+    for (int i = 0; i < M.n; i++) {
+      for (int j = 0; j < this.m; j++) {
+        for (int k = 0; k < this.n; k++) {
           A.set(j, i, A.get(j,i) + (this.get(j,k) * M.get(k,i)) );
         }
       }
@@ -112,13 +96,23 @@ public class Matrix {
   }
 
   public Vector mult(Vector V) {
-    return mult((Matrix)V).toVector();
+    if (this.n != V.m) {
+      System.err.println("error: incomplatible matrix sizes");
+      return null;
+    }
+    Vector A = new Vector(this.m, 0d);
+    for (int j = 0; j < this.m; j++) {
+      for (int k = 0; k < this.n; k++) {
+        A.set(j, A.get(j) + (this.get(j,k) * V.get(k)) );
+      }
+    }
+    return A;
   }
 
   public Matrix fillMatrix(double e) {
-    for (int i = 1; i <= m; i++) {
-      for (int j = 1; j <= n; j++) {
-        set(i,j,e);
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        elts[i][j] = e;
       }
     }
     return this;
@@ -126,9 +120,9 @@ public class Matrix {
 
   public Matrix fillGaussian() {
     Random gen = new Random();
-    for (int i = 1; i <= m; i++) {
-      for (int j = 1; j <= n; j++) {
-        set(i, j, gen.nextGaussian());
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        elts[i][j] = gen.nextGaussian();
       }
     }
     return this;
@@ -139,7 +133,7 @@ public class Matrix {
       return null;
     }
     Vector V = new Vector(this.m);
-    for (int i = 1; i <= this.m; i++) {
+    for (int i = 0; i < this.m; i++) {
       V.set(i, this.get(i,1));
     }
     return V;

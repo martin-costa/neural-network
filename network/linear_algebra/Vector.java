@@ -1,55 +1,125 @@
 package network.linear_algebra;
 
-public class Vector extends Matrix {
+import java.util.Random;
+
+public class Vector {
+  public final int m; //rows
+
+  private double[] elts;
 
   public Vector(int m) {
-    super(m, 1);
+    this.m = m;
+    elts = new double[m];
+    fillGaussian();
   }
 
   public Vector(int m, double x) {
-    super(m, 1, x);
+    this.m = m;
+    elts = new double[m];
+    fillVector(x);
   }
 
   public Vector(double[] elts) {
-    super(elts.length, 1);
-    double[][] elts2 = new double[1][];
-    elts2[0] = elts;
-    super.setMatrix(elts2);
+    this.m = elts.length;
+    this.elts = elts;
   }
 
   public Vector(Vector V) {
-    super(V);
+    this.m = V.m;
+    setVector(V);
+  }
+
+  public void setVector(Vector V) {
+    elts = new double[V.m];
+    for (int i = 0; i < m; i++) {
+      set(i, V.get(i));
+    }
   }
 
   public void set(int m, double x) {
-    super.set(m,1,x);
+    elts[m] = x;
   }
 
   public double get(int m) {
-    return super.get(m,1);
+    return elts[m];
   }
 
   public Vector add(Vector V) {
-    return super.add(V).toVector();
+    if (this.m != V.m) {
+      System.err.println("error: incomplatible vector sizes");
+      return null;
+    }
+    Vector U = new Vector(m);
+    for (int i = 0; i < m; i++) {
+      U.set(i, this.get(i) + V.get(i));
+    }
+    return U;
   }
 
   public double dot(Vector x) {
-    if (super.m != x.m) {
+    if (this.m != x.m) {
       System.out.println("error: vectors have different dimensions");
       return 0;
     }
     double dotProduct = 0;
-    for (int i = 1; i <= x.m; i++) {
-      dotProduct += super.get(i,1) * x.get(i,1);
+    for (int i = 0; i < x.m; i++) {
+      dotProduct += this.get(i) * x.get(i);
     }
     return dotProduct;
   }
 
   public double length() {
     double length = 0;
-    for (int i = 1; i <= m; i++) {
+    for (int i = 0; i < m; i++) {
       length += Math.pow(get(i), 2);
     }
     return Math.sqrt(length);
   }
+
+  public int maxIndex() {
+    int j = 0;
+    for (int i = 1; i < m; i++) {
+      if (elts[i] > elts[i - 1]) {
+        j = i;
+      }
+    }
+    return j;
+  }
+
+  public Vector fillVector(double e) {
+    for (int i = 0; i < m; i++) {
+      elts[i] = e;
+    }
+    return this;
+  }
+
+  public Vector fillGaussian() {
+    Random gen = new Random();
+    for (int i = 0; i < m; i++) {
+      elts[i] = gen.nextGaussian();
+    }
+    return this;
+  }
+
+  public String toString(int d) {
+    String end = " ;";
+    if (d >= 10) {
+      end = " ]\n[";
+      d = (int)Math.abs(d - 10);
+    }
+    String s = "[";
+    for (int i = 0; i < m; i++) {
+      s += " " + String.format("%."+d+"f", this.elts[i]);
+      if (i < m - 1) {
+        s += end;
+      }
+    }
+    s += " ]";
+    return s;
+  }
+
+  public String toString() {
+    return toString(5);
+  }
+
 }

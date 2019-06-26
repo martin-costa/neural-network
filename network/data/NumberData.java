@@ -7,7 +7,7 @@ import network.linear_algebra.*;
 public class NumberData {
 
   //amount of images in this piece of data
-  public final int n;
+  public final int size;
 
   //array of n vectors containing data for images
   public Vector[] images;
@@ -15,10 +15,14 @@ public class NumberData {
   //array of ideal results for corresponding image input
   public Vector[] results;
 
-  NumberData(int n) {
-    this.n = n;
-    images = new Vector[n];
-    results = new Vector[n];
+  //array of ideal results for corresponding image input
+  public int[] numbers;
+
+  NumberData(int size) {
+    this.size = size;
+    images = new Vector[size];
+    results = new Vector[size];
+    numbers = new int[size];
   }
 
   //add one of the n pieces of data
@@ -33,19 +37,25 @@ public class NumberData {
       images[k] = new Vector(V);
     }
     catch(Exception e) {
-      System.out.println("image index out of range");
+      System.out.println("image index out of range" + e);
     }
   }
 
   //add the result of a piece of data
   public void addResult(int k, int i) {
-    results[k] = resultVector(i);
+    try {
+      numbers[k] = i;
+      results[k] = resultVector(i);
+    }
+    catch(Exception e) {
+      System.out.println("result index out of range");
+    }
   }
 
   //get the result vector for a number
   public Vector resultVector(int i) {
-    Vector V = new Vector(10, 0); //10 dim 0 vec.
-    V.set(i + 1, 1);
+    Vector V = new Vector(10, 0); //the 10 dim 0 vec.
+    V.set(i, 1);
     return V;
   }
 }
