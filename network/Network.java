@@ -45,15 +45,14 @@ public class Network {
 
   //sgd algorithm for training the neural network
   public void stochasticGradientDescent(int epochs, int miniBatchSize, int learnRate, NumberData trainingData, NumberData testData) {
-    int n = trainingData.size;
 
     //run each epoch of training
     for (int i = 0; i < epochs; i++) {
       NumberData[] miniBatches = trainingData.randomize().split(miniBatchSize);
 
       //update mini batches
-      for (NumberData miniBatch : miniBatches) {
-        updateMiniBatch(miniBatch);
+      for (int j = 0; j < miniBatches.length; j++) {
+        updateMiniBatch(miniBatches[j], learnRate);
       }
 
       //test the current weights and biases against the test data
@@ -65,13 +64,73 @@ public class Network {
   }
 
   //applies sgd using backprop to a mini batch
-  public void updateMiniBatch(NumberData miniBatch) {
+  public void updateMiniBatch(NumberData miniBatch, int learnRate) {
 
+    Matrix[] gradw = new Matrix[layerCount - 1];
+    Vector[] gradb = new Vector[layerCount - 1];
+
+    for (int j = 0; j < layerCount - 1; j++) {
+      gradw[j] = new Matrix(weights[j].m, weights[j].n, 0);
+      gradb[j] = new Vector(biases[j].m, 0);
+    }
+
+    Matrix[] dgradw = new Matrix[layerCount - 1];
+    Vector[] dgradb = new Vector[layerCount - 1];
+
+    for (int j = 0; j < layerCount - 1; j++) {
+      dgradw[j] = new Matrix(weights[j].m, weights[j].n, 0);
+      dgradb[j] = new Vector(biases[j].m, 0);
+    }
+
+    //for each piece of training data
+    for (int i = 0; i < miniBatch.size; i++) {
+
+      for (int j = 0; j < layerCount - 1; j++) {
+        dgradw[j].fillMatrix(0);
+        dgradb[j].fillVector(0);
+      }
+
+      backpropagation(dgradw, dgradb, miniBatch.getImage(i), miniBatch.getResult(i));
+
+      for (int j = 0; j < layerCount - 1; j++) {
+        gradw[j] = gradw[j].add(dgradw[j]); //<<-- slowness all here!!
+        gradb[j] = gradb[j].add(dgradb[j]);
+      }
+    }
+
+    for (int j = 0; j < layerCount - 1; j++) {
+      weights[j] = weights[j].add(gradw[j].mult(-(double)learnRate/(double)miniBatch.size));
+      biases[j] = biases[j].add(gradb[j].mult(-(double)learnRate/(double)miniBatch.size));
+    }
   }
 
-  //backprop
-  public void backpropagation() {
+  //backpropegation algorithm for calculating the gradient of the cost function
+  public void backpropagation(Matrix[] dgradw, Vector[] dgradb, Vector image, Vector result) {
+    Vector[] As = new Vector[layerCount]; //activations
+    Vector[] Zs = new Vector[layerCount - 1]; //pre sigmoid activations
 
+    Vector a = image;
+    As[0] = a;
+
+    //get activations of layers
+    for (int i = 0; i < layerCount - 1; i++) {
+      Vector z = weights[i].mult(a).add(biases[i]);
+      Zs[i] = new Vector(z);
+      a = sigmoid(z);
+      As[i + 1] = new Vector(a); // may work w/ out new
+    }
+    //backwards pass
+    Vector delta = (As[layerCount - 1].add(result.mult(-1))).schur(sigmoidPrime(Zs[layerCount - 2]));
+
+    dgradb[layerCount - 2] = delta;
+    dgradw[layerCount - 2] = delta.mult(As[layerCount - 2]);
+
+    for (int i = 2; i < layerCount; i++) {
+      Vector z = Zs[layerCount - i - 1];
+      delta = weights[layerCount - i].transpose().mult(delta).schur(sigmoidPrime(z));
+      dgradb[layerCount - i - 1] = delta;
+      dgradw[layerCount - i - 1] = delta.mult(As[layerCount - i - 1]);
+    }
   }
 
   public int evaluate(NumberData testData) {
@@ -84,6 +143,7 @@ public class Network {
 
   //aux methods ..............
 
+  //sigmoid
   public static double sigmoid(double x) {
     return 1d/(1d + Math.exp(-x));
   }
@@ -91,6 +151,18 @@ public class Network {
   public static Vector sigmoid(Vector x) {
     for (int i = 0; i < x.m; i++) {
       x.set(i , sigmoid(x.get(i)));
+    }
+    return x;
+  }
+
+  //derivative of sigmoid
+  public static double sigmoidPrime(double x) {
+    return sigmoid(x)*(1d - sigmoid(x));
+  }
+
+  public static Vector sigmoidPrime(Vector x) {
+    for (int i = 0; i < x.m; i++) {
+      x.set(i , sigmoidPrime(x.get(i)));
     }
     return x;
   }

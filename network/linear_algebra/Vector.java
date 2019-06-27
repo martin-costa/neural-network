@@ -56,6 +56,23 @@ public class Vector {
     return U;
   }
 
+  public Vector mult(double x) {
+    for (int i = 0; i < m; i++) {
+      elts[i] *= x;
+    }
+    return this;
+  }
+
+  public Matrix mult(Vector x) {
+    Matrix M = new Matrix(this.m, x.m);
+    for (int i = 0; i < this.m; i++) {
+      for (int j = 0; j < x.m; j++) {
+        M.set(i, j, this.get(i)*x.get(j));
+      }
+    }
+    return M;
+  }
+
   public double dot(Vector x) {
     if (this.m != x.m) {
       System.out.println("error: vectors have different dimensions");

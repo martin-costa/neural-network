@@ -25,7 +25,7 @@ public class NumberData {
   public NumberData randomize() {
     Random generator = new Random();
     int i = size;
-    
+
     while (1 < i) {
       int j = generator.nextInt(i--);
       DataPiece temp = data[i];
@@ -44,7 +44,6 @@ public class NumberData {
 
       for (int j = 0; j < newSize; j++) {
         int index = i*newSize + j;
-
         batches[i].addData(j, data[index].number, data[index].image);
       }
     }

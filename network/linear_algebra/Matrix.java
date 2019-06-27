@@ -41,8 +41,8 @@ public class Matrix {
 
   private void setMatrix(Matrix M) {
     elts = new double[m][n];
-    for (int i = 1; i <= m; i++) {
-      for (int j = 1; j <= n; j++) {
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
         set(i,j, M.get(i,j));
       }
     }
@@ -79,6 +79,19 @@ public class Matrix {
     return A;
   }
 
+  public Matrix add2(Matrix M) {
+    if (this.m != M.m || this.n != M.n) {
+      System.err.println("error: incomplatible matrix sizes");
+      return null;
+    }
+    for (int i = 0; i < this.m; i++) {
+      for (int j = 0; j < this.n; j++) {
+        set(i, j, get(i,j) + M.get(i,j));
+      }
+    }
+    return this;
+  }
+
   public Matrix mult(Matrix M) {
     if (this.n != M.m) {
       System.err.println("error: incomplatible matrix sizes");
@@ -93,6 +106,25 @@ public class Matrix {
       }
     }
     return A;
+  }
+
+  public Matrix mult(double x) {
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        elts[i][j] *= x;
+      }
+    }
+    return this;
+  }
+
+  public Matrix transpose() {
+    Matrix M = new Matrix(this.n, this.m, 0);
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        M.set(j, i, get(i, j));
+      }
+    }
+    return M;
   }
 
   public Vector mult(Vector V) {
