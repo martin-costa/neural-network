@@ -1,61 +1,84 @@
 package network.data;
 
 import network.linear_algebra.*;
-
-
+import java.util.Random;
 
 public class NumberData {
 
-  //amount of images in this piece of data
+  //amount of numbers in data
   public final int size;
 
-  //array of n vectors containing data for images
-  public Vector[] images;
-
-  //array of ideal results for corresponding image input
-  public Vector[] results;
-
-  //array of ideal results for corresponding image input
-  public int[] numbers;
+  //data
+  private DataPiece[] data;
 
   NumberData(int size) {
     this.size = size;
-    images = new Vector[size];
-    results = new Vector[size];
-    numbers = new int[size];
+    data = new DataPiece[size];
   }
 
-  //add one of the n pieces of data
-  public void addData(int k, int i, Vector V) {
-    addImage(k, V);
-    addResult(k, i);
+  //add a piece of data to this set
+  public void addData(int i, int number, Vector image) {
+    data[i] = new DataPiece(new Vector(image), number);
   }
 
-  //add the image of a piece of data
-  public void addImage(int k, Vector V) {
-    try {
-      images[k] = new Vector(V);
+  //randomize order of data pieces for random sampling
+  public NumberData randomize() {
+    Random generator = new Random();
+    int i = size;
+    
+    while (1 < i) {
+      int j = generator.nextInt(i--);
+      DataPiece temp = data[i];
+      data[i] = data[j];
+      data[j] = temp;
     }
-    catch(Exception e) {
-      System.out.println("image index out of range" + e);
+    return this;
+  }
+
+  //splits the NumberData new NumberDatas of size newSize
+  public NumberData[] split(int newSize) {
+    int batchCount = size/newSize;
+    NumberData[] batches = new NumberData[batchCount];
+    for (int i = 0; i < batchCount; i++) {
+      batches[i] = new NumberData(newSize);
+
+      for (int j = 0; j < newSize; j++) {
+        int index = i*newSize + j;
+
+        batches[i].addData(j, data[index].number, data[index].image);
+      }
+    }
+    return batches;
+  }
+
+  //getters for all the data
+  public Vector getImage(int i) {
+    return data[i].image;
+  }
+
+  public int getNumber(int i) {
+    return data[i].number;
+  }
+
+  public Vector getResult(int i) {
+    return data[i].vectoriseNumber();
+  }
+
+  //data structure for data peice
+  private class DataPiece {
+    public Vector image;
+    public int number;
+
+    DataPiece(Vector image, int number) {
+      this.image = image;
+      this.number = number;
+    }
+
+    public Vector vectoriseNumber() {
+      Vector V = new Vector(10, 0); //the 10 dim 0 vec.
+      V.set(number, 1);
+      return V;
     }
   }
 
-  //add the result of a piece of data
-  public void addResult(int k, int i) {
-    try {
-      numbers[k] = i;
-      results[k] = resultVector(i);
-    }
-    catch(Exception e) {
-      System.out.println("result index out of range");
-    }
-  }
-
-  //get the result vector for a number
-  public Vector resultVector(int i) {
-    Vector V = new Vector(10, 0); //the 10 dim 0 vec.
-    V.set(i, 1);
-    return V;
-  }
 }

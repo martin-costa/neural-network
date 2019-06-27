@@ -126,9 +126,7 @@ public class Window {
   public void close() {
     window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
   }
-
-
-
+  
   class DrawingPanel extends JPanel {
 
     @Override

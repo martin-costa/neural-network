@@ -44,8 +44,24 @@ public class Network {
   //learning algorithms here
 
   //sgd algorithm for training the neural network
-  public void stochasticGradientDescent(int epochs, int miniBatches, int learnRate, NumberData trainingData, NumberData testData) {
+  public void stochasticGradientDescent(int epochs, int miniBatchSize, int learnRate, NumberData trainingData, NumberData testData) {
+    int n = trainingData.size;
 
+    //run each epoch of training
+    for (int i = 0; i < epochs; i++) {
+      NumberData[] miniBatches = trainingData.randomize().split(miniBatchSize);
+
+      //update mini batches
+      for (NumberData miniBatch : miniBatches) {
+        updateMiniBatch(miniBatch);
+      }
+
+      //test the current weights and biases against the test data
+      if (testData != null) {
+        System.out.println(evaluate(testData) + "/" + testData.size + " numbers correctly classified");
+      }
+      System.out.println("Epoch " + i + " complete");
+    }
   }
 
   //applies sgd using backprop to a mini batch
@@ -61,7 +77,7 @@ public class Network {
   public int evaluate(NumberData testData) {
     int j = 0;
     for (int i = 0; i < testData.size; i++) {
-      if (feedForward(testData.images[i]).maxIndex() == testData.numbers[i]) j++;
+      if (feedForward(testData.getImage(i)).maxIndex() == testData.getNumber(i)) j++;
     }
     return j;
   }

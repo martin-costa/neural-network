@@ -11,6 +11,7 @@ import network.linear_algebra.*;
 
 public class DataLoader {
 
+  //loads the MNIST training data
   public static NumberData loadMNISTTraining(boolean showData) {
     try {
       return loadMNIST(showData, "train");
@@ -21,6 +22,7 @@ public class DataLoader {
     }
   }
 
+  //loads the MNIST test data
   public static NumberData loadMNISTTest(boolean showData) {
     try {
       return loadMNIST(showData, "t10k");
@@ -31,7 +33,7 @@ public class DataLoader {
     }
   }
 
-  //this method is to load in the data from the MNIST database
+  //this method loads in the data from the MNIST database
   private static NumberData loadMNIST(boolean showData, String path) throws IOException {
     //make display window for data being loaded
     Window display = null;
@@ -56,38 +58,28 @@ public class DataLoader {
     images.skip(8);
     labels.skip(8);
 
-    Vector pixelVector = new Vector(res*res, 0);
+    Vector pixels = new Vector(res*res, 0);
 
     //create the data
     data = new NumberData(imageCount);
 
-    for(int k = 0; k < imageCount; k++) {
-      if(k % 50 == 0) System.out.print("\r" + k + "/" + imageCount + " images loaded");
+    for(int j = 0; j < imageCount; j++) {
+      if(j % 50 == 0) System.out.print("\r" + j + "/" + imageCount + " images loaded");
+
+      byte[] pixelData = new byte[res*res];
+
+      images.read(pixelData);
+      for (int i = 0; i < res*res; i++) {
+        pixels.set(i, ((int)pixelData[i] & 0xff)/255d);
+      }
 
       //update the display window
       if (showData) {
-        double[][] pixels = new double[res][res];
-        for (int j = 0; j < res; j++) {
-          for (int i = 0; i < res; i++) {
-            pixels[i][j] = images.read()/255d;
-            pixelVector.set(j*res + i, pixels[i][j]);
-          }
-        }
-        display.display(pixelVector);
+        display.display(pixels);
         display.update();
       }
-      else {
-        for (int i = 0; i < res*res; i++) {
-          pixelVector.set(i, images.read()/255d);
-        }
-      }
 
-      data.addData(k, labels.read(), pixelVector);
-
-      // try {
-      //   Thread.sleep(200);
-      // }
-      // catch(Exception e) {}
+      data.addData(j, labels.read(), pixels);
     }
 
     if (showData) display.close();
