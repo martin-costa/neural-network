@@ -90,22 +90,31 @@ public class Window {
       y = y/pixelWidth;
 
       pixels.set(x + y*resolution, 1);
-      pixels.set(x + 1 + y*resolution, 1);
-      pixels.set(x - 1 + y*resolution, 1);
-      pixels.set(x + (y + 1)*resolution, 1);
-      pixels.set(x + (y - 1)*resolution, 1);
 
-      if (pixels.get(x + 1 + (y + 1)*resolution) < 1) {
-        pixels.set(x + 1 + (y + 1)*resolution, Math.random());
+      if (pixels.get(x + 1 + y*resolution) < 1) {
+        pixels.set(x + 1 + y*resolution, 0.5 + Math.random()*0.5);
       }
-      if (pixels.get(x + 1 + (y - 1)*resolution) < 1) {
-        pixels.set(x + 1 + (y - 1)*resolution, Math.random());
+      if (pixels.get(x - 1 + y*resolution) < 1) {
+        pixels.set(x - 1 + y*resolution, 0.5 + Math.random()*0.5);
       }
-      if (pixels.get(x - 1 + (y + 1)*resolution) < 1) {
-        pixels.set(x - 1 + (y + 1)*resolution, Math.random());
+      if (pixels.get(x + (y + 1)*resolution) < 1) {
+        pixels.set(x + (y + 1)*resolution, 0.5 + Math.random()*0.5);
       }
-      if (pixels.get(x - 1 + (y - 1)*resolution) < 1) {
-        pixels.set(x - 1 + (y - 1)*resolution, Math.random());
+      if (pixels.get(x + (y - 1)*resolution) < 1) {
+        pixels.set(x + (y - 1)*resolution, 0.5 + Math.random()*0.5);
+      }
+
+      if (pixels.get(x + 1 + (y + 1)*resolution) < 0.5) {
+        pixels.set(x + 1 + (y + 1)*resolution, Math.random()/2);
+      }
+      if (pixels.get(x + 1 + (y - 1)*resolution) < 0.5) {
+        pixels.set(x + 1 + (y - 1)*resolution, Math.random()/2);
+      }
+      if (pixels.get(x - 1 + (y + 1)*resolution) < 0.5) {
+        pixels.set(x - 1 + (y + 1)*resolution, Math.random()/2);
+      }
+      if (pixels.get(x - 1 + (y - 1)*resolution) < 0.5) {
+        pixels.set(x - 1 + (y - 1)*resolution, Math.random()/2);
       }
     }
     catch(ArrayIndexOutOfBoundsException e) {}
@@ -126,7 +135,11 @@ public class Window {
   public void close() {
     window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
   }
-  
+
+  public Vector getPixels() {
+    return this.pixels;
+  }
+
   class DrawingPanel extends JPanel {
 
     @Override

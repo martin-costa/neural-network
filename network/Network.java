@@ -2,7 +2,6 @@ package network;
 
 import network.linear_algebra.*;
 import network.data.*;
-import java.util.Random;
 
 public class Network {
   private int[] layers;
@@ -17,18 +16,16 @@ public class Network {
     this.layers = layers;
     layerCount = layers.length;
 
-    Random generator = new Random();
-
     //initialise biases
     biases = new Vector[layerCount - 1];
     for (int i = 0; i < layerCount - 1; i++) {
-      biases[i] = new Vector(layers[i + 1]);
+      biases[i] = new Vector(layers[i + 1]).fillGaussian();
     }
 
     //initialise weights
     weights = new Matrix[layerCount - 1];
     for (int i = 0; i < layerCount - 1; i++) {
-      weights[i] = new Matrix(layers[i + 1], layers[i]);
+      weights[i] = new Matrix(layers[i + 1], layers[i]).fillGaussian();
     }
   }
 
@@ -69,15 +66,13 @@ public class Network {
     Matrix[] gradw = new Matrix[layerCount - 1];
     Vector[] gradb = new Vector[layerCount - 1];
 
-    for (int j = 0; j < layerCount - 1; j++) {
-      gradw[j] = new Matrix(weights[j].m, weights[j].n, 0);
-      gradb[j] = new Vector(biases[j].m, 0);
-    }
-
     Matrix[] dgradw = new Matrix[layerCount - 1];
     Vector[] dgradb = new Vector[layerCount - 1];
 
     for (int j = 0; j < layerCount - 1; j++) {
+      gradw[j] = new Matrix(weights[j].m, weights[j].n, 0);
+      gradb[j] = new Vector(biases[j].m, 0);
+
       dgradw[j] = new Matrix(weights[j].m, weights[j].n, 0);
       dgradb[j] = new Vector(biases[j].m, 0);
     }
@@ -86,8 +81,8 @@ public class Network {
     for (int i = 0; i < miniBatch.size; i++) {
 
       for (int j = 0; j < layerCount - 1; j++) {
-        dgradw[j].fillMatrix(0);
-        dgradb[j].fillVector(0);
+        dgradw[j].fill(0);
+        dgradb[j].fill(0);
       }
 
       backpropagation(dgradw, dgradb, miniBatch.getImage(i), miniBatch.getResult(i));
@@ -136,9 +131,13 @@ public class Network {
   public int evaluate(NumberData testData) {
     int j = 0;
     for (int i = 0; i < testData.size; i++) {
-      if (feedForward(testData.getImage(i)).maxIndex() == testData.getNumber(i)) j++;
+      if (classify(testData.getImage(i)) == testData.getNumber(i)) j++;
     }
     return j;
+  }
+
+  public int classify(Vector image) {
+    return feedForward(image).maxIndex();
   }
 
   //aux methods ..............

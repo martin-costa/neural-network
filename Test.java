@@ -8,14 +8,25 @@ public class Test {
   public static void main(String[] args) {
 
     NumberData trainingData = DataLoader.loadMNISTTraining(false);
-    NumberData testData = DataLoader.loadMNISTTest(false).randomize();
+    NumberData testData = DataLoader.loadMNISTTest(false);
 
-    Network net = new Network(784, 30, 10);
+    Network network = new Network(784, 30, 10);
 
-    net.stochasticGradientDescent(30, 10, 3, trainingData, testData);
+    network.stochasticGradientDescent(30, 10, 3, trainingData, testData);
 
-    Window W = new Window();
+    trainingData = null;
+    testData = null;
 
-    W.close();
+    Window display = new Window();
+
+    int i = 0;
+    while(true) {
+      i++;
+      if (i % 1000 == 0) {
+        System.out.print("\r" + network.classify(display.getPixels()));
+        display.update();
+      }
+    }
+    //window.close();
   }
 }

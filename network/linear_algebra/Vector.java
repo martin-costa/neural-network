@@ -10,13 +10,12 @@ public class Vector {
   public Vector(int m) {
     this.m = m;
     elts = new double[m];
-    fillGaussian();
   }
 
   public Vector(int m, double x) {
     this.m = m;
     elts = new double[m];
-    fillVector(x);
+    fill(x);
   }
 
   public Vector(double[] elts) {
@@ -115,7 +114,7 @@ public class Vector {
     return j;
   }
 
-  public Vector fillVector(double e) {
+  public Vector fill(double e) {
     for (int i = 0; i < m; i++) {
       elts[i] = e;
     }

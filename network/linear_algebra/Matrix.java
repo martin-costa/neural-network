@@ -12,14 +12,13 @@ public class Matrix {
     this.m = m;
     this.n = n;
     elts = new double[m][n];
-    fillGaussian();
   }
 
   public Matrix(int m, int n, double x) {
     this.m = m;
     this.n = n;
     elts = new double[m][n];
-    fillMatrix(x);
+    fill(x);
   }
 
   public Matrix(double[][] elts) {
@@ -141,7 +140,7 @@ public class Matrix {
     return A;
   }
 
-  public Matrix fillMatrix(double e) {
+  public Matrix fill(double e) {
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
         elts[i][j] = e;
