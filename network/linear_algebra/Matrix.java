@@ -33,11 +33,6 @@ public class Matrix {
     setMatrix(M);
   }
 
-  private void initialiseMatrix() {
-    elts = new double[m][n];
-    fillGaussian();
-  }
-
   private void setMatrix(Matrix M) {
     elts = new double[m][n];
     for (int i = 0; i < m; i++) {
@@ -149,11 +144,11 @@ public class Matrix {
     return this;
   }
 
-  public Matrix fillGaussian() {
+  public Matrix fillGaussian(double mu, double sigma) {
     Random gen = new Random();
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
-        elts[i][j] = gen.nextGaussian();
+        elts[i][j] = gen.nextGaussian()*sigma + mu;
       }
     }
     return this;

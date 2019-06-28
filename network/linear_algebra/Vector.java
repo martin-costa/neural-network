@@ -121,10 +121,10 @@ public class Vector {
     return this;
   }
 
-  public Vector fillGaussian() {
+  public Vector fillGaussian(double mu, double sigma) {
     Random gen = new Random();
     for (int i = 0; i < m; i++) {
-      elts[i] = gen.nextGaussian();
+      elts[i] = gen.nextGaussian()*sigma + mu;
     }
     return this;
   }

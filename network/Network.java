@@ -19,13 +19,13 @@ public class Network {
     //initialise biases
     biases = new Vector[layerCount - 1];
     for (int i = 0; i < layerCount - 1; i++) {
-      biases[i] = new Vector(layers[i + 1]).fillGaussian();
+      biases[i] = new Vector(layers[i + 1]).fillGaussian(0, 1d/Math.sqrt(layers[i]));
     }
 
     //initialise weights
     weights = new Matrix[layerCount - 1];
     for (int i = 0; i < layerCount - 1; i++) {
-      weights[i] = new Matrix(layers[i + 1], layers[i]).fillGaussian();
+      weights[i] = new Matrix(layers[i + 1], layers[i]).fillGaussian(0, 1d/Math.sqrt(layers[i]));
     }
   }
 
@@ -41,7 +41,7 @@ public class Network {
   //learning algorithms here
 
   //sgd algorithm for training the neural network
-  public void stochasticGradientDescent(int epochs, int miniBatchSize, int learnRate, NumberData trainingData, NumberData testData) {
+  public void stochasticGradientDescent(int epochs, int miniBatchSize, double learnRate, NumberData trainingData, NumberData testData) {
 
     //run each epoch of training
     for (int i = 0; i < epochs; i++) {
@@ -61,7 +61,7 @@ public class Network {
   }
 
   //applies sgd using backprop to a mini batch
-  public void updateMiniBatch(NumberData miniBatch, int learnRate) {
+  public void updateMiniBatch(NumberData miniBatch, double learnRate) {
 
     Matrix[] gradw = new Matrix[layerCount - 1];
     Vector[] gradb = new Vector[layerCount - 1];
@@ -94,8 +94,8 @@ public class Network {
     }
 
     for (int j = 0; j < layerCount - 1; j++) {
-      weights[j] = weights[j].add(gradw[j].mult(-(double)learnRate/(double)miniBatch.size));
-      biases[j] = biases[j].add(gradb[j].mult(-(double)learnRate/(double)miniBatch.size));
+      weights[j] = weights[j].add(gradw[j].mult(-learnRate/(double)miniBatch.size));
+      biases[j] = biases[j].add(gradb[j].mult(-learnRate/(double)miniBatch.size));
     }
   }
 

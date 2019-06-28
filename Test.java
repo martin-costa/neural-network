@@ -12,7 +12,7 @@ public class Test {
 
     Network network = new Network(784, 30, 10);
 
-    network.stochasticGradientDescent(10, 10, 3, trainingData, testData);
+    network.stochasticGradientDescent(16, 10, 3, trainingData, testData);
 
     trainingData = null;
     testData = null;
