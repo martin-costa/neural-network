@@ -98,7 +98,7 @@ public class Window {
     try{
       x = 10*x/pixelWidth;
       y = 10*y/pixelWidth;
-      int r = 10;
+      int r = 8;
 
       for (int i = x - r; i <= x + r; i++) {
         for (int j = y - r; j <= y + r; j++) {
@@ -133,22 +133,77 @@ public class Window {
   }
 
   public void processDrawing() {
+    //requires work
+    Vector buffer = normalize();
 
-    //change reslution to imageResolution
+    if (buffer == null) return;
+
+    changeRes(buffer);
+    centre();
+  }
+
+  //get smallest box containing drawing
+  private int getBoundingBox(boolean lower, boolean x) {
+    int k = lower ? 1 : -1;
+    int start = lower ? 0 : displayResolution - 1;
+
+    for (int i = 0; i < displayResolution; i++) {
+      for (int j = 0; j < displayResolution; j++) {
+        int index = x ? (start + k*i) + j*displayResolution : j + (start + k*i)*displayResolution;
+        if (displayPixels.get(index) > 0) return start + k*i;
+      }
+    }
+    return 0;
+  }
+
+  //preprocessing methods
+
+  private Vector normalize() {
+
+    //method requires some work
+
+    int leftX = getBoundingBox(true, true);
+    int rightX = getBoundingBox(false, true);
+    int lowerY = getBoundingBox(true, false);
+    int upperY = getBoundingBox(false, false);
+
+    int dx = rightX - leftX;
+    int dy = upperY - lowerY;
+
+    if (dx < 1 || dy < 1) return null;
+
+    double z = Math.max((double)dx/200d, (double)dy/200d);
+    double dx0 = (dx/z);
+    double dy0 = (dy/z);
+
+    Vector buffer = new Vector(displayResolution*displayResolution, 0);
+    for (int i = 0; i < (int)dx0; i++) {
+      for (int j = 0; j < (int)dy0; j++) {
+        try {
+          buffer.set(i + j*displayResolution, displayPixels.get(leftX + (int)Math.round(i*z) + ((int)Math.round(lowerY + j*z))*displayResolution));
+        }
+        catch(Exception e) {}
+      }
+    }
+    return buffer;
+  }
+
+  private void changeRes(Vector buffer) {
     for (int i = 0; i < imageResolution; i++) {
       for (int j = 0; j < imageResolution; j++) {
         double totalColor = 0;
 
         for (int i0 = 0; i0 < 10; i0++) {
           for (int j0 = 0; j0 < 10; j0++) {
-            totalColor += displayPixels.get(i*10 + i0 + (j*10 + j0)*displayResolution);
+            totalColor += buffer.get(i*10 + i0 + (j*10 + j0)*displayResolution);
           }
         }
         imagePixels.set(i + j*imageResolution, totalColor/100d);
       }
     }
+  }
 
-    //centre by centre of mass
+  private void centre() {
     double x = 0;
     double y = 0;
     double m = 0;
@@ -176,7 +231,6 @@ public class Window {
         }
       }
     }
-
     imagePixels = buffer;
   }
 
@@ -208,6 +262,9 @@ public class Window {
           }
         }
       }
+      // g.setColor(new Color(255, 0, 0, 255));
+      // g.fillRect(pixelWidth*20, 0, 1, pixelWidth*imageResolution);
+      // g.fillRect(0, pixelWidth*20, pixelWidth*imageResolution, 1);
     }
   }
 
@@ -247,6 +304,9 @@ public class Window {
         drawMode = !drawMode;
         System.out.println("Drawmode: " + drawMode);
         reset();
+      }
+      if (Character.toLowerCase(e.getKeyChar()) == 'p') {
+        processDrawing();
       }
     }
   }

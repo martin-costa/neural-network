@@ -10,9 +10,9 @@ public class Test {
     NumberData trainingData = DataLoader.loadMNISTTraining(false);
     NumberData testData = DataLoader.loadMNISTTest(false);
 
-    Network network = new Network(784, 30, 10);
+    Network network = new Network(784, 100, 10);
 
-    network.stochasticGradientDescent(16, 10, 3, trainingData, testData);
+    network.stochasticGradientDescent(30, 10, 3, trainingData, testData);
 
     trainingData = null;
     testData = null;
