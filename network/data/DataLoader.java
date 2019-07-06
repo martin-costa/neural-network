@@ -1,13 +1,10 @@
 package network.data;
 
-import network.ui.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.io.*;
-import java.awt.image.*;
+import java.util.zip.*;
+
 import network.linear_algebra.*;
+import network.ui.*;
 
 public class DataLoader {
 
@@ -45,8 +42,8 @@ public class DataLoader {
     //the data
     NumberData data = null;
 
-    FileInputStream images = new FileInputStream("network/data/mnist/" + path + "-images.idx3-ubyte");
-    FileInputStream labels = new FileInputStream("network/data/mnist/" + path + "-labels.idx1-ubyte");
+    GZIPInputStream images = new GZIPInputStream(new FileInputStream("network/data/mnist/" + path + "-images-idx3-ubyte.gz"));
+    GZIPInputStream labels = new GZIPInputStream(new FileInputStream("network/data/mnist/" + path + "-labels-idx1-ubyte.gz"));
 
     //skip magic number
     images.skip(4);
@@ -58,19 +55,22 @@ public class DataLoader {
     images.skip(8);
     labels.skip(8);
 
+    //create vector to store pixels in form used by network
     Vector pixels = new Vector(res*res, 0);
 
-    //create the data
+    //create buffer to load data
+    byte[] buffer = new byte[res*res];
+
+    //initialise the data storage
     data = new NumberData(imageCount);
 
+    //main loop where all the images are loaded
     for(int j = 0; j < imageCount; j++) {
-      if(j % 50 == 0) System.out.print("\r" + j + "/" + imageCount + " images loaded");
+      if(j % 101 == 0) System.out.print("\r" + j + "/" + imageCount + " images loaded");
 
-      byte[] pixelData = new byte[res*res];
-
-      images.read(pixelData);
+      readCompressedData(buffer, images);
       for (int i = 0; i < res*res; i++) {
-        pixels.set(i, ((int)pixelData[i] & 0xff)/255d);
+        pixels.set(i, ((int)buffer[i] & 0xff)/255d);
       }
 
       //update the display window
@@ -78,12 +78,27 @@ public class DataLoader {
         display.display(pixels);
         display.update();
       }
-
       data.addData(j, labels.read(), pixels);
+
+      // try {
+      //   Thread.sleep(500);
+      // }
+      // catch(Exception e) {}
     }
+
+    images.close();
+    labels.close();
 
     if (showData) display.close();
     System.out.println("\r" + imageCount + "/" + imageCount + " images loaded");
     return data;
   }
+
+  private static void readCompressedData(byte[] buffer, GZIPInputStream stream) throws IOException {
+    int j = buffer.length;
+    while (j > 0) {
+      j -= stream.read(buffer, buffer.length - j, j);
+    }
+  }
+
 }

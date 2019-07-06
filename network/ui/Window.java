@@ -24,8 +24,9 @@ public class Window {
   //display reslution is the resultion the iumages are drawn in
   //image resultion is the resultion of the images that need to
   //be exported and displayed
-  private final int displayResolution = 280;
   private final int imageResolution = 28;
+  private final int pixelRatio = 10;
+  private final int displayResolution = imageResolution*pixelRatio;
 
   private final int pixelWidth = 20;
 
@@ -96,8 +97,8 @@ public class Window {
   //draw on the window
   public void draw(int x , int y) {
     try{
-      x = 10*x/pixelWidth;
-      y = 10*y/pixelWidth;
+      x = pixelRatio*x/pixelWidth;
+      y = pixelRatio*y/pixelWidth;
       int r = 8;
 
       for (int i = x - r; i <= x + r; i++) {
@@ -109,6 +110,12 @@ public class Window {
       }
     }
     catch(ArrayIndexOutOfBoundsException e) {}
+  }
+
+  //applies preprocessing and returns the image
+  public Vector getPixels() {
+    processDrawing();
+    return imagePixels;
   }
 
   //move the window to mouse position
@@ -127,17 +134,17 @@ public class Window {
     window.dispatchEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSING));
   }
 
-  public Vector getPixels() {
-    processDrawing();
-    return imagePixels;
-  }
+  /* the following methods are all used to proprocess the images drawn
+   * before being exported as vectors to be used by the network. The methods
+   * take what has been drawn onto the window and normalize it, rescale its
+   * resolution, and centre the image by centre of mass.
+   */
 
   public void processDrawing() {
     //requires work
     Vector buffer = normalize();
 
     if (buffer == null) return;
-
     changeRes(buffer);
     centre();
   }
@@ -156,12 +163,8 @@ public class Window {
     return 0;
   }
 
-  //preprocessing methods
-
   private Vector normalize() {
-
     //method requires some work
-
     int leftX = getBoundingBox(true, true);
     int rightX = getBoundingBox(false, true);
     int lowerY = getBoundingBox(true, false);
@@ -193,9 +196,9 @@ public class Window {
       for (int j = 0; j < imageResolution; j++) {
         double totalColor = 0;
 
-        for (int i0 = 0; i0 < 10; i0++) {
-          for (int j0 = 0; j0 < 10; j0++) {
-            totalColor += buffer.get(i*10 + i0 + (j*10 + j0)*displayResolution);
+        for (int i0 = 0; i0 < pixelRatio; i0++) {
+          for (int j0 = 0; j0 < pixelRatio; j0++) {
+            totalColor += buffer.get(i*pixelRatio + i0 + (j*pixelRatio + j0)*displayResolution);
           }
         }
         imagePixels.set(i + j*imageResolution, totalColor/100d);
@@ -204,9 +207,8 @@ public class Window {
   }
 
   private void centre() {
-    double x = 0;
-    double y = 0;
-    double m = 0;
+
+    double x = 0, y = 0, m = 0;
     for (int i = 0; i < imageResolution; i++) {
       for (int j = 0; j < imageResolution; j++) {
         m += imagePixels.get(i + j*imageResolution);
@@ -217,8 +219,7 @@ public class Window {
     x /= m;
     y /= m;
 
-    int dx = (int)(x - imageResolution/2);
-    int dy = (int)(y - imageResolution/2);
+    int dx = (int)(x - imageResolution/2), dy = (int)(y - imageResolution/2);
 
     Vector buffer = new Vector(imageResolution*imageResolution);
     for (int i = 0; i < imageResolution; i++) {
@@ -234,39 +235,40 @@ public class Window {
     imagePixels = buffer;
   }
 
+  /* the class DrawingPanel is used to paint onto the window by drawing the
+   * images loaded when in display mode and displaying when is being drawn
+   * while in drawmode.
+   */
+
   class DrawingPanel extends JPanel {
 
     @Override
     public void paint(Graphics g) {
 
-      //draw imagePixels if not in drawing mode
+      int resolution = displayResolution;
+      int width = pixelWidth/pixelRatio;
+      Vector buffer = displayPixels;
       if (!drawMode) {
-        for (int i = 0; i < imageResolution; i++) {
-          for (int j = 0; j < imageResolution; j++) {
-            double c = imagePixels.get(i + j*imageResolution);
-            int intensity = (int)((1 - c)*255);
-            g.setColor(new Color(intensity, intensity, intensity, 255));
-            g.fillRect(i*pixelWidth, j*pixelWidth, pixelWidth, pixelWidth);
-          }
-        }
+        resolution = imageResolution;
+        width = pixelWidth;
+        buffer = imagePixels;
       }
 
-      //if in drawing mode draw displayPixels
-      else {
-        for (int i = 0; i < displayResolution; i++) {
-          for (int j = 0; j < displayResolution; j++) {
-            double c = displayPixels.get(i + j*displayResolution);
-            int intensity = (int)((1 - c)*255);
-            g.setColor(new Color(intensity, intensity, intensity, 255));
-            g.fillRect(i*pixelWidth/10, j*pixelWidth/10, pixelWidth/10, pixelWidth/10);
-          }
+      for (int i = 0; i < resolution; i++) {
+        for (int j = 0; j < resolution; j++) {
+          double c = buffer.get(i + j*resolution);
+          int intensity = (int)((1 - c)*255);
+          g.setColor(new Color(intensity, intensity, intensity, 255));
+          g.fillRect(i*width, j*width, width, width);
         }
       }
-      // g.setColor(new Color(255, 0, 0, 255));
-      // g.fillRect(pixelWidth*20, 0, 1, pixelWidth*imageResolution);
-      // g.fillRect(0, pixelWidth*20, pixelWidth*imageResolution, 1);
     }
   }
+
+  /* the classes MouseInputs and KeyInputs handle all of the inputs to the
+   * window. Any inputs from mouse or keyboard should be triggered here
+   * but handled by appropriate methods above.
+   */
 
   //handles all the mouse inputs
   class MouseInputs extends MouseAdapter {
@@ -301,8 +303,7 @@ public class Window {
 
     public void keyTyped(KeyEvent e) {
       if (Character.toLowerCase(e.getKeyChar()) == 'd') {
-        drawMode = !drawMode;
-        System.out.println("Drawmode: " + drawMode);
+        drawMode = true;
         reset();
       }
       if (Character.toLowerCase(e.getKeyChar()) == 'p') {

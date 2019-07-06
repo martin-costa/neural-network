@@ -7,15 +7,21 @@ public class Test {
 
   public static void main(String[] args) {
 
-    NumberData trainingData = DataLoader.loadMNISTTraining(false);
-    NumberData testData = DataLoader.loadMNISTTest(false);
+    // NumberData trainingData = DataLoader.loadMNISTTraining(false);
+    // NumberData testData = DataLoader.loadMNISTTest(false);
+    //
+    // Network network = new Network(784, 30, 10);
+    //
+    // network.stochasticGradientDescent(15, 10, 3, trainingData, testData);
+    //
+    // trainingData = null;
+    // testData = null;
+    //
+    // NetworkLoader.storeNetwork("PretrainedNetwork1", network);
 
-    Network network = new Network(784, 100, 10);
+    Network network = NetworkLoader.loadNetwork("PretrainedNetwork1");
 
-    network.stochasticGradientDescent(30, 10, 3, trainingData, testData);
-
-    trainingData = null;
-    testData = null;
+    System.out.println(network.evaluate(DataLoader.loadMNISTTest(false)));
 
     Window display = new Window();
 
@@ -27,6 +33,5 @@ public class Test {
         display.update();
       }
     }
-    //window.close();
   }
 }

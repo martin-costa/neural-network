@@ -4,17 +4,16 @@ import network.linear_algebra.*;
 import network.data.*;
 
 public class Network {
-  private int[] layers;
   private int layerCount;
+  private int[] layers;
 
   private Matrix[] weights;
   private Vector[] biases;
 
   //initialise the neural network
   public Network(int... layers) {
-
-    this.layers = layers;
     layerCount = layers.length;
+    this.layers = layers;
 
     //initialise biases
     biases = new Vector[layerCount - 1];
@@ -27,6 +26,13 @@ public class Network {
     for (int i = 0; i < layerCount - 1; i++) {
       weights[i] = new Matrix(layers[i + 1], layers[i]).fillGaussian(0, 1d/Math.sqrt(layers[i]));
     }
+  }
+
+  public Network(int[] layers, Matrix[] weights, Vector[] biases) {
+    layerCount = layers.length;
+    this.layers = layers;
+    this.weights = weights;
+    this.biases = biases;
   }
 
   //method that gets output for input x for current weights and biases
@@ -164,5 +170,19 @@ public class Network {
       x.set(i , sigmoidPrime(x.get(i)));
     }
     return x;
+  }
+
+  //getters and setters
+  public int getLayerCount() {
+    return layerCount;
+  }
+  public int[] getLayers() {
+    return layers;
+  }
+  public Matrix[] getWeights() {
+    return weights;
+  }
+  public Vector[] getBiases() {
+    return biases;
   }
 }

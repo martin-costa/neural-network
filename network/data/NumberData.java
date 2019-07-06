@@ -63,7 +63,7 @@ public class NumberData {
     return data[i].vectoriseNumber();
   }
 
-  //data structure for data peice
+  //data structure for data piece
   private class DataPiece {
     public Vector image;
     public int number;
