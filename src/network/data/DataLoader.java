@@ -42,8 +42,8 @@ public class DataLoader {
     //the data
     NumberData data = null;
 
-    GZIPInputStream images = new GZIPInputStream(new FileInputStream("network/data/mnist/" + path + "-images-idx3-ubyte.gz"));
-    GZIPInputStream labels = new GZIPInputStream(new FileInputStream("network/data/mnist/" + path + "-labels-idx1-ubyte.gz"));
+    GZIPInputStream images = new GZIPInputStream(new FileInputStream("../data/mnist/" + path + "-images-idx3-ubyte.gz"));
+    GZIPInputStream labels = new GZIPInputStream(new FileInputStream("../data/mnist/" + path + "-labels-idx1-ubyte.gz"));
 
     //skip magic number
     images.skip(4);
@@ -81,7 +81,7 @@ public class DataLoader {
       data.addData(j, labels.read(), pixels);
 
       // try {
-      //   Thread.sleep(500);
+      //   Thread.sleep(200);
       // }
       // catch(Exception e) {}
     }

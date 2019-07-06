@@ -12,14 +12,12 @@ public class Test {
     //
     // Network network = new Network(784, 30, 10);
     //
-    // network.stochasticGradientDescent(15, 10, 3, trainingData, testData);
+    // network.stochasticGradientDescent(2, 10, 3, trainingData, testData);
     //
     // trainingData = null;
     // testData = null;
-    //
-    // NetworkLoader.storeNetwork("PretrainedNetwork1", network);
 
-    Network network = NetworkLoader.loadNetwork("PretrainedNetwork1");
+    Network network = NetworkLoader.loadNetwork("pretrainednetwork1");
 
     System.out.println(network.evaluate(DataLoader.loadMNISTTest(false)));
 
@@ -33,5 +31,6 @@ public class Test {
         display.update();
       }
     }
+
   }
 }
