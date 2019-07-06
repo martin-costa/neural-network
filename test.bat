@@ -1,4 +1,6 @@
 cd src
+javac -d ../bin Test.java
 cls
-java -cp ../bin Test
-exit 0
+
+java -cp ../bin Test %~1%
+::exit 0

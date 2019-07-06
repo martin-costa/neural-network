@@ -9,9 +9,9 @@ import network.ui.*;
 public class DataLoader {
 
   //loads the MNIST training data
-  public static NumberData loadMNISTTraining(boolean showData) {
+  public static NumberData loadMNISTTraining(boolean showData, boolean showProgress) {
     try {
-      return loadMNIST(showData, "train");
+      return loadMNIST(showData, showProgress, "train");
     }
     catch(IOException e) {
       System.out.println("\rError loading training data");
@@ -20,9 +20,9 @@ public class DataLoader {
   }
 
   //loads the MNIST test data
-  public static NumberData loadMNISTTest(boolean showData) {
+  public static NumberData loadMNISTTest(boolean showData, boolean showProgress) {
     try {
-      return loadMNIST(showData, "t10k");
+      return loadMNIST(showData, showProgress, "t10k");
     }
     catch(IOException e) {
       System.out.println("\rError loading test data");
@@ -31,7 +31,7 @@ public class DataLoader {
   }
 
   //this method loads in the data from the MNIST database
-  private static NumberData loadMNIST(boolean showData, String path) throws IOException {
+  private static NumberData loadMNIST(boolean showData, boolean showProgress, String path) throws IOException {
     //make display window for data being loaded
     Window display = null;
 
@@ -66,7 +66,7 @@ public class DataLoader {
 
     //main loop where all the images are loaded
     for(int j = 0; j < imageCount; j++) {
-      if(j % 101 == 0) System.out.print("\r" + j + "/" + imageCount + " images loaded");
+      if(showProgress && j % 101 == 0) System.out.print("\r" + j + "/" + imageCount + " images loaded");
 
       readCompressedData(buffer, images);
       for (int i = 0; i < res*res; i++) {
@@ -90,7 +90,7 @@ public class DataLoader {
     labels.close();
 
     if (showData) display.close();
-    System.out.println("\r" + imageCount + "/" + imageCount + " images loaded");
+    if (showProgress) System.out.println("\r" + imageCount + "/" + imageCount + " images loaded");
     return data;
   }
 

@@ -293,7 +293,6 @@ public class Window {
 
     public void keyPressed(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_R && drawMode) {
-        System.out.println("Resetting");
         reset();
       }
       if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
