@@ -1,7 +1,7 @@
-import network.*;
-import network.data.*;
-import network.linear_algebra.*;
-import network.ui.*;
+import neural_network.network.*;
+import neural_network.data.*;
+import neural_network.linear_algebra.*;
+import neural_network.ui.*;
 
 public class Test {
 
@@ -17,15 +17,17 @@ public class Test {
 
     //run this code if neither of the above arguments used =>
 
-    // NumberData trainingData = DataLoader.loadMNISTTraining(false, true);
-    // NumberData testData = DataLoader.loadMNISTTest(false, true);
-    //
-    // Network network = new Network(784, 30, 10);
-    //
-    // network.stochasticGradientDescent(2, 10, 3, trainingData, testData);
-    //
-    // trainingData = null;
-    // testData = null;
+    NumberData trainingData = DataLoader.loadMNISTTraining(false, true);
+    NumberData testData = DataLoader.loadMNISTTest(false, true);
+
+    Network1 network1 = new Network1(784, 100, 10);
+    Network2 network2 = new Network2(784, 100, 10);
+
+    network1.stochasticGradientDescent(30, 10, 3, trainingData, testData);
+    network2.stochasticGradientDescent(30, 10, 0.5, trainingData, testData);
+
+    trainingData = null;
+    testData = null;
   }
 
   //allow user input into the netowrk
@@ -51,14 +53,14 @@ public class Test {
   }
 
   //trains a new network with inputs as hyperparameters
-  public static Network trainNetwork(String[] args) {
+  public static Network1 trainNetwork(String[] args) {
     int layerCount = args.length - 4;
     int[] layers = new int[layerCount];
 
     for (int i = 0; i < layerCount; i++) {
       layers[i] = Integer.valueOf(args[4 + i]);
     }
-    Network network = new Network(layers);
+    Network1 network = new Network1(layers);
     network.stochasticGradientDescent(Integer.valueOf(args[1]), Integer.valueOf(args[2]), Double.valueOf(args[3]), DataLoader.loadMNISTTraining(false, false), DataLoader.loadMNISTTest(false, false));
     return network;
   }

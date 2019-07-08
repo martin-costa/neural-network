@@ -9,7 +9,7 @@ Run the following command in a terminal in the root directory of the project to 
 
 ```java
 start test "load network"
-//example: start test "load pretrainednetwork1"
+//example: start test "load net1"
 ```
 
 To create and train a network using stochastic gradient descent and backpropegation, run the following command with the appropriate hyperparameters
