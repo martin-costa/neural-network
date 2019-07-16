@@ -7,8 +7,9 @@ public class Test {
 
   public static void main(String[] args) {
 
+    //let user load or train a network
     if (args.length > 1 && args[0].equals("load")) {
-      useNetwork(loadNetwork(args[1]));
+      useNetwork(loadNetwork(args[1], true));
     }
 
     if (args.length > 4 && args[0].equals("train")) {
@@ -17,38 +18,46 @@ public class Test {
 
     //run this code if neither of the above arguments used =>
 
-    NumberData trainingData = DataLoader.loadMNISTTraining(false, true);
+    //TRAIN AND STORE A NETWORK
+
+    // NumberData trainingData = DataLoader.loadMNISTTraining(false, true);
+    // NumberData testData = DataLoader.loadMNISTTest(false, true);
+    //
+    // Network2 network = new Network2(784, 100, 10);
+    // network.stochasticGradientDescent(0, 10, 0.2, 5, trainingData, testData);
+    // NetworkLoader.storeNetwork("net6", network);
+    //
+    // trainingData = null;
+    // testData = null;
+    // useNetwork(network);
+
+    //LOAD AND TEST MULTNETWORK (note: net 2 & 3 and weaker)
+
     NumberData testData = DataLoader.loadMNISTTest(false, true);
-
-    Network1 network1 = new Network1(784, 100, 10);
-    Network2 network2 = new Network2(784, 100, 10);
-
-    network1.stochasticGradientDescent(30, 10, 3, trainingData, testData);
-    network2.stochasticGradientDescent(30, 10, 0.5, trainingData, testData);
-
-    trainingData = null;
-    testData = null;
+    MultiNetwork multiNetwork = NetworkLoader.loadNetworks("net1", "net2", "net5");
+    useNetwork(multiNetwork);
   }
 
   //allow user input into the netowrk
-  public static void useNetwork(Network network) {
+  public static <T extends Classifier> void useNetwork(T classifier) {
     Window display = new Window();
     int i = 0;
 
     while(true) {
-      i++;
-      if (i % 1000 == 0) {
-        System.out.print("\r" + network.classify(display.getPixels()));
-        display.update();
+
+      if (i++ % 2500 == 0) {
+        display.draw();
+        System.out.print("\r" + classifier.classify(display.getPixels()));
       }
+      display.update();
     }
   }
 
   //loads network with name path
-  public static Network loadNetwork(String path) {
+  public static Network loadNetwork(String path, boolean test) {
     Network network = NetworkLoader.loadNetwork(path);
     System.out.println("loading network: " + path);
-    System.out.println(network.evaluate(DataLoader.loadMNISTTest(false, false)) + "/10000 images classified correctly");
+    if (test) System.out.println(network.evaluate(DataLoader.loadMNISTTest(false, false)) + "/10000 images classified correctly");
     return network;
   }
 
@@ -64,5 +73,4 @@ public class Test {
     network.stochasticGradientDescent(Integer.valueOf(args[1]), Integer.valueOf(args[2]), Double.valueOf(args[3]), DataLoader.loadMNISTTraining(false, false), DataLoader.loadMNISTTest(false, false));
     return network;
   }
-
 }

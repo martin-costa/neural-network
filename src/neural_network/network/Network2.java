@@ -21,7 +21,7 @@ public class Network2 extends Network {
   //learning algorithms implemented here
 
   //sgd algorithm for training the neural network
-  public void stochasticGradientDescent(int epochs, int miniBatchSize, double learnRate, NumberData trainingData, NumberData testData) {
+  public void stochasticGradientDescent(int epochs, int miniBatchSize, double learnRate, double lambda, NumberData trainingData, NumberData testData) {
 
     //run each epoch of training
     for (int i = 0; i < epochs; i++) {
@@ -29,7 +29,7 @@ public class Network2 extends Network {
 
       //update mini batches
       for (int j = 0; j < miniBatches.length; j++) {
-        updateMiniBatch(miniBatches[j], learnRate);
+        updateMiniBatch(miniBatches[j], learnRate, lambda, trainingData.size);
       }
 
       //test the current weights and biases against the test data
@@ -41,7 +41,7 @@ public class Network2 extends Network {
   }
 
   //applies sgd using backprop to a mini batch
-  public void updateMiniBatch(NumberData miniBatch, double learnRate) {
+  public void updateMiniBatch(NumberData miniBatch, double learnRate, double lambda, int size) {
 
     Matrix[] gradw = new Matrix[layerCount - 1];
     Vector[] gradb = new Vector[layerCount - 1];
@@ -73,8 +73,9 @@ public class Network2 extends Network {
       }
     }
 
+    //added factor for L2 regularisation
     for (int j = 0; j < layerCount - 1; j++) {
-      weights[j] = weights[j].add(gradw[j].mult(-learnRate/(double)miniBatch.size));
+      weights[j] = weights[j].mult(1 - (learnRate*lambda)/(double)size).add(gradw[j].mult(-learnRate/(double)miniBatch.size));
       biases[j] = biases[j].add(gradb[j].mult(-learnRate/(double)miniBatch.size));
     }
   }

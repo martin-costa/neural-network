@@ -65,7 +65,7 @@ public class Window {
     window.setResizable(false);
     window.setVisible(true);
 
-    window.setSize(new Dimension(imageResolution*pixelWidth, imageResolution*pixelWidth));
+    window.setSize(new Dimension(2*imageResolution*pixelWidth + 1, imageResolution*pixelWidth));
     window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
 
@@ -78,13 +78,13 @@ public class Window {
     if (mouseInputs.rightPressed)
       move();
 
-    if (drawMode) {
-      //draw on the window by left clicking
-      if (mouseInputs.leftPressed && drawMode)
-        draw((int)(mousePos.getX() - window.getX()), (int)(mousePos.getY() - window.getY()));
+    //draw on the window by left clicking
+    if (mouseInputs.leftPressed && drawMode) {
+      draw((int)(mousePos.getX() - window.getX()), (int)(mousePos.getY() - window.getY()));
     }
+  }
 
-    //update the windows image
+  public void draw() {
     panel.repaint();
   }
 
@@ -125,8 +125,9 @@ public class Window {
 
   //clear the window
   public void reset() {
-    imagePixels = new Vector(imageResolution*imageResolution, 0);
     displayPixels = new Vector(displayResolution*displayResolution, 0);
+    imagePixels = new Vector(imageResolution*imageResolution, 0);
+    update();
   }
 
   //close the window
@@ -207,7 +208,6 @@ public class Window {
   }
 
   private void centre() {
-
     double x = 0, y = 0, m = 0;
     for (int i = 0; i < imageResolution; i++) {
       for (int j = 0; j < imageResolution; j++) {
@@ -245,21 +245,25 @@ public class Window {
     @Override
     public void paint(Graphics g) {
 
-      int resolution = displayResolution;
-      int width = pixelWidth/pixelRatio;
-      Vector buffer = displayPixels;
-      if (!drawMode) {
-        resolution = imageResolution;
-        width = pixelWidth;
-        buffer = imagePixels;
-      }
+      //draw the drawing
+      drawImage(g, displayResolution, pixelWidth/pixelRatio, 0, displayPixels);
 
+      //draw line separating images
+      g.setColor(new Color(0, 0, 0, 255));
+      g.fillRect(displayResolution*2, 0, 1, displayResolution*2);
+
+      //draw preprocessing
+      drawImage(g, imageResolution, pixelWidth, displayResolution*2 + 1, imagePixels);
+    }
+
+    //draws the image passed in
+    public void drawImage(Graphics g, int resolution, int width, int offset, Vector buffer) {
       for (int i = 0; i < resolution; i++) {
         for (int j = 0; j < resolution; j++) {
           double c = buffer.get(i + j*resolution);
           int intensity = (int)((1 - c)*255);
           g.setColor(new Color(intensity, intensity, intensity, 255));
-          g.fillRect(i*width, j*width, width, width);
+          g.fillRect(i*width + offset, j*width, width, width);
         }
       }
     }
@@ -304,9 +308,6 @@ public class Window {
       if (Character.toLowerCase(e.getKeyChar()) == 'd') {
         drawMode = true;
         reset();
-      }
-      if (Character.toLowerCase(e.getKeyChar()) == 'p') {
-        processDrawing();
       }
     }
   }

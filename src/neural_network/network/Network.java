@@ -4,7 +4,7 @@ import neural_network.linear_algebra.*;
 import neural_network.data.*;
 import neural_network.network.activation_functions.*;
 
-public class Network {
+public class Network implements Classifier{
   protected int layerCount;
   protected int[] layers;
 

@@ -39,7 +39,7 @@ public class NetworkLoader {
       weights = new Matrix[layerCount - 1];
       for (int i = 0; i < layerCount - 1; i++) {
         weights[i] = new Matrix(layers[i + 1], layers[i]);
-        
+
         for (int j = 0; j < layers[i + 1]; j++) {
           for (int k = 0; k < layers[i]; k++) {
             weights[i].set(j, k, reader.readDouble());
@@ -55,6 +55,15 @@ public class NetworkLoader {
 
     //create and return a neural net
     return new Network(layers, weights, biases);
+  }
+
+  public static MultiNetwork loadNetworks(String... paths) {
+    Network[] networks = new Network[paths.length];
+
+    for (int i = 0; i < paths.length; i++) {
+      networks[i] = loadNetwork(paths[i]);
+    }
+    return new MultiNetwork(networks);
   }
 
   public static void storeNetwork(String path, Network network) {
@@ -92,7 +101,6 @@ public class NetworkLoader {
     catch(IOException e) {
       System.out.println("error storing network" + e);
     }
-
   }
 
 }

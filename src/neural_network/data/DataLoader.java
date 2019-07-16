@@ -9,9 +9,9 @@ import neural_network.ui.*;
 public class DataLoader {
 
   //loads the MNIST training data
-  public static NumberData loadMNISTTraining(boolean showData, boolean showProgress) {
+  public static NumberData loadMNISTTraining(boolean showData, boolean showProgress, int start, int size) {
     try {
-      return loadMNIST(showData, showProgress, "train");
+      return loadMNIST(showData, showProgress, "train", start, size);
     }
     catch(IOException e) {
       System.out.println("\rError loading training data");
@@ -19,10 +19,15 @@ public class DataLoader {
     }
   }
 
+  //load in all the MNIST training data
+  public static NumberData loadMNISTTraining(boolean showData, boolean showProgress) {
+    return loadMNISTTraining(showData, showProgress, 0, 60000);
+  }
+
   //loads the MNIST test data
-  public static NumberData loadMNISTTest(boolean showData, boolean showProgress) {
+  public static NumberData loadMNISTTest(boolean showData, boolean showProgress, int start, int size) {
     try {
-      return loadMNIST(showData, showProgress, "t10k");
+      return loadMNIST(showData, showProgress, "t10k", start, size);
     }
     catch(IOException e) {
       System.out.println("\rError loading test data");
@@ -30,8 +35,13 @@ public class DataLoader {
     }
   }
 
+  //load in all the MNIST test data
+  public static NumberData loadMNISTTest(boolean showData, boolean showProgress) {
+    return loadMNISTTest(showData, showProgress, 0, 10000);
+  }
+
   //this method loads in the data from the MNIST database
-  private static NumberData loadMNIST(boolean showData, boolean showProgress, String path) throws IOException {
+  private static NumberData loadMNIST(boolean showData, boolean showProgress, String path, int start, int size) throws IOException {
     //make display window for data being loaded
     Window display = null;
 
@@ -50,10 +60,15 @@ public class DataLoader {
 
     //get image count, stored as 32 bit integer so requires next 4 bytes
     int imageCount = (images.read() << 24) | (images.read() << 16) | (images.read() << 8) | (images.read());
+    imageCount = Math.min(imageCount - start, size);
 
     //skip rest to labels and pixels
     images.skip(8);
     labels.skip(8);
+
+    //skip images to start index
+    images.skip(res*res*start);
+    labels.skip(start);
 
     //create vector to store pixels in form used by network
     Vector pixels = new Vector(res*res, 0);
@@ -81,7 +96,7 @@ public class DataLoader {
       data.addData(j, labels.read(), pixels);
 
       // try {
-      //   Thread.sleep(200);
+      //   Thread.sleep(500);
       // }
       // catch(Exception e) {}
     }

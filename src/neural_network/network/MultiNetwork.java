@@ -1,39 +1,43 @@
 package neural_network.network;
 
+import java.util.ArrayList;
+
 import neural_network.network.*;
 import neural_network.data.*;
 import neural_network.linear_algebra.*;
 import neural_network.ui.*;
 
-public class MultiNetwork {
+public class MultiNetwork implements Classifier{
 
-  private Network[] networks;
+  private ArrayList<Network> networks;
 
-  public final int n;
+  public MultiNetwork() {
+    this.networks = new ArrayList<>();
+  }
 
-  public MultiNetwork(int n, int... layers) {
-    this.n = n;
-    this.networks = new Network[n];
-    for (int i = 0; i < n; i++) {
-      networks[i] = new Network(layers);
+  public MultiNetwork(Network... networks) {
+    this.networks = new ArrayList<>();
+    for (int i = 0; i < networks.length; i++) {
+      this.networks.add(networks[i]);
     }
   }
 
-  public void train(int epochs, int miniBatchSize, double learnRate, NumberData trainingData, NumberData testData) {
-    for (int j = 0; j < epochs; j++) {
-      for (int i = 0; i < n; i++) {
-        networks[i].stochasticGradientDescent(1, miniBatchSize, learnRate, trainingData, null);
-      }
-      if (testData != null) {
-        System.out.println("Epoch " + j + " test data " + evaluate(testData) + "/" + testData.size);
-      }
-    }
-  }
-
+  //classify by pooling, generally better
   public int classify(Vector image) {
     Vector results = new Vector(10, 0);
-    for (int i = 0; i < n; i++) {
-      results = results.add(networks[i].feedForward(image));
+    for (Network network : networks) {
+      results = results.add(network.feedForward(image));
+    }
+    return results.maxIndex();
+  }
+
+  //classify by voting
+  public int classify2(Vector image) {
+    Vector results = new Vector(10, 0);
+    for (Network network : networks) {
+      Vector v = new Vector(10, 0);
+      v.set(network.classify(image), 1);
+      results = results.add(v);
     }
     return results.maxIndex();
   }
@@ -44,5 +48,9 @@ public class MultiNetwork {
       if (classify(testData.getImage(i)) == testData.getNumber(i)) j++;
     }
     return j;
+  }
+
+  public void addNetowrk(Network network) {
+    this.networks.add(network);
   }
 }
